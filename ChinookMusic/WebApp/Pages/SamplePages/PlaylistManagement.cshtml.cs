@@ -64,8 +64,14 @@ namespace WebApp.Pages.SamplePages
 
         public List<PlaylistTrackInfo> qplaylistInfo { get; set; }
 
+        //this property will be tied to the input fields of the webpage
+        //this list is tied to the table data elements for the playlist
+
         [BindProperty]
         public List<PlaylistTrackTRX> cplaylistInfo { get; set; }
+        //this property is tied to the form input element located on each 
+        //of the rows of the track table 
+        //it will hold the trackid one wishes to add to the playlist
 
         [BindProperty]
         public int addtrackid { get; set; }
@@ -73,6 +79,9 @@ namespace WebApp.Pages.SamplePages
         public const string USERNAME = "HansenB";
         public void OnGet()
         {
+            //this method is executed everytime the page is called for the first time
+            //or 
+            //whenever a Get request is made to the page such as RedirectToPage()
             GetTrackInfo();
             GetPlaylist();
         }
@@ -100,6 +109,7 @@ namespace WebApp.Pages.SamplePages
             }
         }
         public IActionResult OnPostTrackSearch()
+            //must have a redirect to page or return to page
         {
             try
             {
@@ -115,6 +125,7 @@ namespace WebApp.Pages.SamplePages
                 {
                     throw new AggregateException(Errors);
                 }
+                //RedirectToPage() will cause an Get request to be issued (OnGet())
                 return RedirectToPage(new
                 {
                     searchBy = searchBy.Trim(),
@@ -170,8 +181,16 @@ namespace WebApp.Pages.SamplePages
                 {
                     throw new Exception("You need to have a playlist select first. Enter a playlist name and Fetch");
                 }
-               
+
                 // Add the code to add a track via the service.
+                //the data needed for your code has AlREADY been placed in your local 
+                //properties by the use of [BindProperty] which is two ways(output/input) 
+                //once security is installed, you would be to obtain the username 
+                //from the operating system
+
+                string username = USERNAME;
+                //call your service sending in the expected data
+                _playlisttrackServices.PlaylistTrack_AddTrack(playlistname, username, addtrackid);
                 
                 FeedBackMessage = "adding the track";
                 return RedirectToPage(new
@@ -190,6 +209,8 @@ namespace WebApp.Pages.SamplePages
                     ErrorDetails.Add(error.Message);
 
                 }
+                //since the OnGet will not called if there is a transaction error
+                //the catch must do the actions of the ONGet
                 GetTrackInfo();
                 GetPlaylist();
 
