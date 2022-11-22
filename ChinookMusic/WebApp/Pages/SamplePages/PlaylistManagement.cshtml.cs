@@ -233,6 +233,24 @@ namespace WebApp.Pages.SamplePages
             {
                //Add the code to process the list of tracks via the service.
 
+                if(string.IsNullOrWhiteSpace(playlistname))
+                {
+                    throw new Exception("you need to have a playlist selected first.Enter a playlist name and press fetch");
+                }
+                var oneselection = cplaylistInfo
+                                  .Where(x => x.SelectedTrack)
+                                  .Count();
+                if (oneselection == 0)
+                {
+                    throw new Exception("you need select atleast one track to delete before pressing remove.");
+                }
+
+                string username = USERNAME;
+                //send data to the service 
+                _playlisttrackServices.PlaylistTrack_RemoveTracks(playlistname, username, cplaylistInfo);
+
+                //success
+                FeedBackMessage = "Tracks have been removed";
                 return RedirectToPage(new
                 {
                     searchBy = string.IsNullOrWhiteSpace(searchBy) ? " " : searchBy.Trim(),
@@ -244,6 +262,56 @@ namespace WebApp.Pages.SamplePages
             {
 
                 ErrorMessage = "Unable to process remove tracks";
+                foreach (var error in ex.InnerExceptions)
+                {
+                    ErrorDetails.Add(error.Message);
+
+                }
+                GetTrackInfo();
+                GetPlaylist();
+
+                return Page();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = GetInnerException(ex).Message;
+                GetTrackInfo();
+                GetPlaylist();
+
+                return Page();
+            }
+
+        }
+
+        public IActionResult OnPostReOrg()
+        {
+            try
+            {
+                //Add the code to process the list of tracks via the service.
+
+                if (string.IsNullOrWhiteSpace(playlistname))
+                {
+                    throw new Exception("you need to have a playlist selected first.Enter a playlist name and press fetch");
+                }
+               
+
+                string username = USERNAME;
+                //send data to the service 
+                _playlisttrackServices.PlaylistTrack_MoveTracks(playlistname, username, cplaylistInfo);
+
+                //success
+                FeedBackMessage = "Tracks have been reorganized";
+                return RedirectToPage(new
+                {
+                    searchBy = string.IsNullOrWhiteSpace(searchBy) ? " " : searchBy.Trim(),
+                    searchArg = string.IsNullOrWhiteSpace(searchArg) ? " " : searchArg.Trim(),
+                    playlistname = playlistname
+                });
+            }
+            catch (AggregateException ex)
+            {
+
+                ErrorMessage = "Unable to process reorganize tracks";
                 foreach (var error in ex.InnerExceptions)
                 {
                     ErrorDetails.Add(error.Message);
